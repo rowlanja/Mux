@@ -1,5 +1,5 @@
 use crate::msg::{AdminsListResp, ExecuteMsg, GreetResp, InstantiateMsg, QueryMsg};
-use crate::state::ADMINS;
+use crate::state::{ADMINS, MERKLE_ROOT};
 use cosmwasm_std::{to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
 use crate::error::ContractError;
 
@@ -15,7 +15,6 @@ pub fn instantiate(
         .map(|addr| deps.api.addr_validate(&addr))
         .collect();
     ADMINS.save(deps.storage, &admins?)?;
-
     Ok(Response::new())
 }
 

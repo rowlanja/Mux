@@ -86,6 +86,7 @@ dependencies = [
  "cosmwasm-std",
  "cw-multi-test",
  "cw-storage-plus",
+ "rs_merkle",
  "serde",
  "thiserror",
 ]
@@ -526,6 +527,15 @@ dependencies = [
  "crypto-bigint",
  "hmac",
  "zeroize",
+]
+
+[[package]]
+name = "rs_merkle"
+version = "1.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "05225752ca6ede4cb1b73aa37ce3904affd042e98f28246f56f438ebfd47a810"
+dependencies = [
+ "sha2 0.10.7",
 ]
 
 [[package]]

@@ -7,6 +7,11 @@ pub struct InstantiateMsg {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+pub struct SetStateOfVaultMerkleTree {
+    pub vault: String,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub enum ExecuteMsg {
     AddMembers { admins: Vec<String> },
     Leave {},
