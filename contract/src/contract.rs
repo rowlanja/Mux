@@ -1,11 +1,12 @@
 use crate::msg::{AdminsListResp, ExecuteMsg, GreetResp, InstantiateMsg, QueryMsg};
-use crate::state::{ADMINS, MERKLE_ROOT, DONATION_DENOM};
+use crate::state::{ADMINS, DONATION_DENOM, TREE, BalanceTree};
 use cosmwasm_std::{
     coins, to_binary, BankMsg, Binary, Deps, DepsMut, Env, Event, MessageInfo,
     Response, StdResult,
 };
 use crate::error::ContractError;
 use cosmwasm_std::StdError;
+use rs_merkle::{MerkleTree, algorithms::Sha256};
 
 pub fn instantiate(
     deps: DepsMut,
@@ -18,9 +19,11 @@ pub fn instantiate(
         .into_iter()
         .map(|addr| deps.api.addr_validate(&addr))
         .collect();
+    let data = Binary(MerkleTree::<Sha256>::new().root().unwrap().to_vec());
+
     ADMINS.save(deps.storage, &admins?)?;
     DONATION_DENOM.save(deps.storage, &msg.donation_denom)?;
-
+    TREE.save(deps.storage, &data)?;
     Ok(Response::new())
 }
 
@@ -44,7 +47,7 @@ pub fn execute(
     match msg {
         AddMembers { admins } => exec::add_members(deps, info, admins),
         Leave {} => exec::leave(deps, info).map_err(Into::into),
-        Donate {} => exec::donate(deps, info),
+        Deposit {} => exec::deposit(deps, info),
     }
 }
 
@@ -94,7 +97,7 @@ mod exec {
         Ok(Response::new())
     }
 
-    pub fn donate(deps: DepsMut, info: MessageInfo) -> Result<Response, ContractError> {
+    pub fn deposit(deps: DepsMut, info: MessageInfo) -> Result<Response, ContractError> {
         let denom = DONATION_DENOM.load(deps.storage)?;
         let admins = ADMINS.load(deps.storage)?;
 
@@ -111,7 +114,7 @@ mod exec {
 
         let resp = Response::new()
             .add_messages(messages)
-            .add_attribute("action", "donate")
+            .add_attribute("action", "deposit")
             .add_attribute("amount", donation.to_string())
             .add_attribute("per_admin", donation_per_admin.to_string());
 
@@ -373,7 +376,7 @@ mod tests {
         app.execute_contract(
             Addr::unchecked("user"),
             addr.clone(),
-            &ExecuteMsg::Donate {},
+            &ExecuteMsg::Deposit {},
             &coins(5, "eth"),
         )
         .unwrap();

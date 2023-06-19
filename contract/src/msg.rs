@@ -11,7 +11,7 @@ pub struct InstantiateMsg {
 pub enum ExecuteMsg {
     AddMembers { admins: Vec<String> },
     Leave {},
-    Donate {},
+    Deposit {},
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
