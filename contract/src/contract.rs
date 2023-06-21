@@ -68,6 +68,9 @@ fn withdraw_cw20(
     Ok(Response::default().add_messages(msgs))
 }
 
+
+// add amount and hash of secret to merkle tree on deposit
+// then add testing
 fn deposit_cw20(
     deps: DepsMut,
     info: MessageInfo,
