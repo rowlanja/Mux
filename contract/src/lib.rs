@@ -28,6 +28,6 @@ pub fn execute(
 }
 
 #[entry_point]
-pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
-    contract::query(deps, env, msg)
+pub fn query(deps: Deps, env: Env, msg: QueryMsg) {
+    
 }

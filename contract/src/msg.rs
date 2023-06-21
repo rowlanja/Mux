@@ -1,36 +1,40 @@
-use cosmwasm_std::Addr;
+use cosmwasm_std::Uint128;
+use cw20::Cw20ReceiveMsg;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-pub struct InstantiateMsg {
-    pub admins: Vec<String>,
-    pub donation_denom: String,
-}
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct InstantiateMsg {}
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
-    AddMembers { admins: Vec<String> },
-    Leave {},
-    Deposit {},
+    Withdraw(WithdrawMsg),
+    Receive(Cw20ReceiveMsg),
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-pub struct SetStateOfVaultMerkleTree {
-    pub vault: String,
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-pub struct GreetResp {
-    pub message: String,
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-pub struct AdminsListResp {
-    pub admins: Vec<Addr>,
-}
-
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
 pub enum QueryMsg {
-    Greet {},
-    AdminsList {},
+    // TODO
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct WithdrawMsg {
+    pub cw20_address: String,
+    pub amount: Uint128,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum Cw20HookMsg {
+    Deposit(DepositMsg),
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub struct DepositMsg {
+    pub cw20_address: String,
+    pub amount: Uint128,
 }

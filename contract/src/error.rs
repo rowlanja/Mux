@@ -1,13 +1,13 @@
-use cosmwasm_std::{Addr, StdError};
-use cw_utils::PaymentError;
+use cosmwasm_std::StdError;
 use thiserror::Error;
 
-#[derive(Error, Debug, PartialEq)]
+#[derive(Error, Debug)]
 pub enum ContractError {
     #[error("{0}")]
-    StdError(#[from] StdError),
-    #[error("{sender} is not contract admin")]
-    Unauthorized { sender: Addr },
-    #[error("Payment error: {0}")]
-    Payment(#[from] PaymentError),
+    Std(#[from] StdError),
+
+    #[error("Unauthorized")]
+    Unauthorized {},
+    // Add any other custom errors you like here.
+    // Look at https://docs.rs/thiserror/1.0.21/thiserror/ for details.
 }
