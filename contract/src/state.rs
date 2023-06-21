@@ -2,9 +2,7 @@ use cosmwasm_std::{
     Addr,
     Binary
 };
-use cw_storage_plus::{
-    Item,
-};
+use cw_storage_plus::Item;
 use rs_merkle::{
     MerkleTree, 
     algorithms::Sha256

@@ -1,9 +1,9 @@
-use crate::msg::{Cw20HookMsg, DepositMsg, ExecuteMsg, InstantiateMsg, QueryMsg, WithdrawMsg};
+use crate::msg::{Cw20HookMsg, GetTreeResponse, DepositMsg, ExecuteMsg, InstantiateMsg, QueryMsg, WithdrawMsg};
 use crate::state::{ADMINS, DONATION_DENOM, TREE, BalanceTree};
 
 use cosmwasm_std::{
     coins, from_binary, to_binary, BankMsg, Binary, Deps, DepsMut, Env, Event, MessageInfo,
-    Response, StdResult, Uint128, CosmosMsg, WasmMsg
+    Response, StdResult, Uint128, CosmosMsg, WasmMsg, entry_point
 };
 use crate::error::ContractError;
 use cosmwasm_std::StdError;
@@ -22,7 +22,7 @@ pub fn instantiate(
     let data = Binary(MerkleTree::<Sha256>::from_leaves(&leaves).root().unwrap().to_vec());
 
     // TREE.save(deps.storage, &data)?;
-    Ok(Response::new())
+    Ok(Response::new().add_attribute("method", "instantiate"))
 }
 
 pub fn execute(
@@ -103,6 +103,20 @@ fn deposit_cw20(
             Ok(Response::default())
         }
         Err(_) => Err(ContractError::Unauthorized {}),
+    }
+}
+
+#[cfg_attr(not(feature = "library"), entry_point)]
+pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
+    to_binary(&query::count(deps)?)
+}
+
+pub mod query {
+    use super::*;
+
+    pub fn count(deps: Deps) -> StdResult<GetTreeResponse> {
+        let state = TREE.load(deps.storage)?;
+        Ok(GetTreeResponse { count: state })
     }
 }
 
