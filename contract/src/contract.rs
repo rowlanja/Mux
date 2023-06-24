@@ -1,4 +1,4 @@
-use crate::msg::{Cw20HookMsg, GetTreeResponse, DepositMsg, ExecuteMsg, InstantiateMsg, QueryMsg, WithdrawMsg};
+use crate::msg::{Cw20HookMsg, GetDepositsResp, DepositMsg, ExecuteMsg, InstantiateMsg, QueryMsg, WithdrawMsg};
 use crate::state::{TREE, DEPOSITS,Deposit};
 use crate::error::ContractError;
 
@@ -125,17 +125,20 @@ fn deposit_cw20(
     }
 }
 
-#[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
-    to_binary(&query::count(deps)?)
+    use QueryMsg::*;
+
+    match msg {
+        DepositsList {} => to_binary(&query::deposits(deps)?),
+    }
 }
 
 pub mod query {
     use super::*;
 
-    pub fn count(deps: Deps) -> StdResult<GetTreeResponse> {
-        let state = TREE.load(deps.storage)?;
-        Ok(GetTreeResponse { count: state })
+    pub fn deposits(deps: Deps) -> StdResult<GetDepositsResp> {
+        let state = DEPOSITS.load(deps.storage)?;
+        Ok(GetDepositsResp { count: state })
     }
 }
 
@@ -179,7 +182,13 @@ mod tests {
                     msg: Binary("hello".as_bytes().to_vec()),
                 })
             )
+            .unwrap(); 
+        
+        let results: GetDepositsResp = app
+            .wrap()
+            .query_wasm_smart(addr, &QueryMsg::DepositsList {})
             .unwrap();
+        print!("{:?}", results) 
     }
 }
 

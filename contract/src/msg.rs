@@ -7,6 +7,8 @@ use cosmwasm_std::{
     Binary,
     Uint128
 };
+use crate::state::Deposit;
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct InstantiateMsg {}
 
@@ -39,11 +41,11 @@ pub struct DepositMsg {
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-pub struct QueryMsg {
+pub enum QueryMsg {
     DepositsList {},
 }
 
 #[cw_serde]
-pub struct GetTreeResponse {
-    pub count: Binary,
+pub struct GetDepositsResp {
+    pub count: Vec<Deposit>,
 }
