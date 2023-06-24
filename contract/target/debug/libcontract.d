@@ -1,1 +1,1 @@
-/home/rowla/mux/contract/target/debug/libcontract.so: /home/rowla/mux/contract/src/lib.rs
+/home/rowla/mux/contract/target/debug/libcontract.so: /home/rowla/mux/contract/src/contract.rs /home/rowla/mux/contract/src/error.rs /home/rowla/mux/contract/src/lib.rs /home/rowla/mux/contract/src/msg.rs /home/rowla/mux/contract/src/state.rs

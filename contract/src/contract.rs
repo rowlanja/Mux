@@ -1,14 +1,25 @@
 use crate::msg::{Cw20HookMsg, GetTreeResponse, DepositMsg, ExecuteMsg, InstantiateMsg, QueryMsg, WithdrawMsg};
-use crate::state::{ADMINS, DONATION_DENOM, TREE, BalanceTree};
-
-use cosmwasm_std::{
-    coins, from_binary, to_binary, BankMsg, Binary, Deps, DepsMut, Env, Event, MessageInfo,
-    Response, StdResult, Uint128, CosmosMsg, WasmMsg, entry_point
-};
+use crate::state::{TREE, DEPOSITS,Deposit};
 use crate::error::ContractError;
+
 use cosmwasm_std::StdError;
 use rs_merkle::{MerkleTree, algorithms::Sha256, Hasher};
 use cw20::{Cw20ExecuteMsg, Cw20ReceiveMsg};
+use cosmwasm_std::{
+    from_binary, 
+    to_binary, 
+    Binary, 
+    Deps, 
+    DepsMut, 
+    Env, 
+    MessageInfo,
+    Response, 
+    StdResult, 
+    CosmosMsg, 
+    WasmMsg, 
+    entry_point,
+    Empty
+};
 
 pub fn instantiate(
     deps: DepsMut,
@@ -33,7 +44,7 @@ pub fn execute(
 ) -> Result<Response, ContractError> {
     match msg {
         ExecuteMsg::Withdraw(msg) => withdraw_cw20(deps, info, msg),
-        ExecuteMsg::Receive(msg) => deposit_cw20(deps, info, msg),
+        ExecuteMsg::Deposit(msg) => deposit_cw20(deps, info, msg),
     }
 }
 fn withdraw_cw20(
@@ -99,7 +110,15 @@ fn deposit_cw20(
             }
 
             // Handle the real "deposit".
-
+            
+            let mut deposits = DEPOSITS.load(deps.storage)?;
+            deposits.push(
+                Deposit {
+                    addr: cw20_address,
+                    amount: amount
+                }
+            );
+            DEPOSITS.save(deps.storage,  &deposits)?;
             Ok(Response::default())
         }
         Err(_) => Err(ContractError::Unauthorized {}),
@@ -117,6 +136,50 @@ pub mod query {
     pub fn count(deps: Deps) -> StdResult<GetTreeResponse> {
         let state = TREE.load(deps.storage)?;
         Ok(GetTreeResponse { count: state })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use cosmwasm_std::Addr;
+    use cw_multi_test::{App, ContractWrapper, Executor};
+    use cosmwasm_std::from_binary;
+    use cosmwasm_std::Uint128;
+    use cosmwasm_std::testing::{mock_dependencies, mock_env, mock_info};
+    use cw20::Cw20ReceiveMsg;
+
+    use super::*;
+
+    #[test]
+    fn deposit_test() {
+        // Create virtual chain
+        let mut app = App::default();
+
+        // Create contract representation
+        let code = ContractWrapper::new(execute, instantiate, query);
+        let code_id = app.store_code(Box::new(code));
+
+        let addr = app
+            .instantiate_contract(
+                code_id,
+                Addr::unchecked("owner"),
+                &Empty {},
+                &[],
+                "Contract",
+                None,
+            )
+            .unwrap();
+
+        let resp: Result<Response, ContractError> = app
+            .wrap()
+            .query_wasm_smart(addr, &ExecuteMsg::Deposit(
+                Cw20ReceiveMsg {
+                    sender: Addr::unchecked("owner").to_string(),
+                    amount: Uint128::new(0),
+                    msg: Binary("hello".as_bytes().to_vec()),
+                })
+            )
+            .unwrap();
     }
 }
 

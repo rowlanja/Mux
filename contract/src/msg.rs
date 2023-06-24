@@ -2,9 +2,8 @@ use cw20::Cw20ReceiveMsg;
 use schemars::JsonSchema;
 use cw_storage_plus::Item;
 use serde::{Deserialize, Serialize};
-use cosmwasm_schema::{cw_serde, QueryResponses};
+use cosmwasm_schema::cw_serde;
 use cosmwasm_std::{
-    Addr,
     Binary,
     Uint128
 };
@@ -15,7 +14,7 @@ pub struct InstantiateMsg {}
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
     Withdraw(WithdrawMsg),
-    Receive(Cw20ReceiveMsg),
+    Deposit(Cw20ReceiveMsg),
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -41,8 +40,7 @@ pub struct DepositMsg {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub struct QueryMsg {
-    pub cw20_address: String,
-    pub amount: Uint128,
+    DepositsList {},
 }
 
 #[cw_serde]
