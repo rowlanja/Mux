@@ -41,7 +41,7 @@ pub fn execute(
     env: Env,
     info: MessageInfo,
     msg: ExecuteMsg,
-) -> StdResult<Response> {
+) -> Result<Response, ContractError> {
     match msg {
         ExecuteMsg::Withdraw(msg) => withdraw_cw20(deps, info, msg),
         ExecuteMsg::Deposit(msg) => deposit_cw20(deps, info, msg),
@@ -51,7 +51,7 @@ fn withdraw_cw20(
     deps: DepsMut,
     info: MessageInfo,
     msg: WithdrawMsg,
-) -> StdResult<Response> {
+) -> Result<Response, ContractError> {
     // Get the params from WithdrawMsg
     let cw20_address = msg.cw20_address;
     let to_sent = msg.amount;
@@ -87,7 +87,7 @@ fn deposit_cw20(
     deps: DepsMut,
     info: MessageInfo,
     cw20_msg: Cw20ReceiveMsg,
-) -> StdResult<Response> {
+) -> Result<Response, ContractError> {
     let token_contract = info.sender;
     let sent_amount = cw20_msg.amount;
 
@@ -173,20 +173,25 @@ mod tests {
             )
             .unwrap();
 
-        let resp: StdResult<GetDepositsResp> = app
-            .wrap()
-            .query_wasm_smart(addr, &ExecuteMsg::Deposit(
-                Cw20ReceiveMsg {
-                    sender: Addr::unchecked("owner").to_string(),
-                    amount: Uint128::new(0),
-                    msg: Binary("hello".as_bytes().to_vec()),
-                })
+        let resp = app
+            .execute_contract(
+                Addr::unchecked("user"),
+                addr.clone(),
+                &ExecuteMsg::Deposit(
+                    Cw20ReceiveMsg {
+                        sender: Addr::unchecked("owner").to_string(),
+                        amount: Uint128::new(0),
+                        msg: Binary("hello".as_bytes().to_vec()),
+                    }
+                ),
+                &[],
+                
             )
             .unwrap(); 
         
         let results: GetDepositsResp = app
             .wrap()
-            .query_wasm_smart(addr, &QueryMsg::DepositsList {})
+            .query_wasm_smart(addr.clone(), &QueryMsg::DepositsList {})
             .unwrap();
         print!("{:?}", results) 
     }
