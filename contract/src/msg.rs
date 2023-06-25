@@ -5,18 +5,23 @@ use serde::{Deserialize, Serialize};
 use cosmwasm_schema::cw_serde;
 use cosmwasm_std::{
     Binary,
-    Uint128
+    Uint128,
+    Coin,
 };
 use crate::state::Deposit;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct InstantiateMsg {}
+pub struct InstantiateMsg {
+    pub arbiter: String,
+}
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
-    Withdraw(WithdrawMsg),
-    Deposit(Cw20ReceiveMsg),
+    Withdraw {},
+    Deposit {
+        quantity: Option<Vec<Coin>>,
+    },
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
