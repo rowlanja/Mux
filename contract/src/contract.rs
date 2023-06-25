@@ -90,40 +90,28 @@ fn deposit_cw20(
 ) -> Result<Response, ContractError> {
     let token_contract = info.sender;
     let sent_amount = cw20_msg.amount;
+    println!("entered {:?}", cw20_msg);
 
-    // Deseralize the message for the params
-    match from_binary(&cw20_msg.msg) {
-        Ok(Cw20HookMsg::Deposit(msg)) => {
-            let DepositMsg {
-                cw20_address,
-                amount,
-            } = msg;
-            // Validations
-            if sent_amount != amount {
-                return Ok(Response::default());
-                // return StdError::GenericErr {
-                //     msg: "Invalid amount".to_string(),
-                // };
-            }
-            if token_contract != deps.api.addr_validate(cw20_address.as_str())? {
-                return Ok(Response::default());
-            }
+    // if token_contract != deps.api.addr_validate(&cw20_msg.sender.as_str())? {
+    //     println!("b");
 
-            // Handle the real "deposit".
-            
-            let mut deposits = DEPOSITS.load(deps.storage)?;
-            deposits.push(
-                Deposit {
-                    addr: cw20_address,
-                    amount: amount
-                }
-            );
-            DEPOSITS.save(deps.storage,  &deposits)?;
-            Ok(Response::default())
+    //     return Ok(Response::default());
+    // }
+
+    // Handle the real "deposit".
+    
+    let mut deposits = DEPOSITS.load(deps.storage)?;
+    deposits.push(
+        Deposit {
+            addr: cw20_msg.sender,
+            amount: sent_amount
         }
-        Err(_) => return Ok(Response::default()),
-    }
+    );
+    println!("saving");
+    DEPOSITS.save(deps.storage,  &deposits)?;
+    Ok(Response::default())
 }
+
 
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     use QueryMsg::*;
@@ -175,7 +163,7 @@ mod tests {
 
         let resp = app
             .execute_contract(
-                Addr::unchecked("user"),
+                Addr::unchecked("owner"),
                 addr.clone(),
                 &ExecuteMsg::Deposit(
                     Cw20ReceiveMsg {
